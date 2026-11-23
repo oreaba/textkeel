@@ -1,0 +1,16 @@
+# Font files you add for the rebuild are licensed: never commit them.
+fonts/
+
+# Outputs
+artifacts/
+output/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/

@@ -1,0 +1,8 @@
+# Only the package sources reach the build: never fonts, outputs or .venv.
+*
+!pyproject.toml
+!README.md
+!LICENSE
+!src/
+**/__pycache__
+**/*.pyc
