@@ -12,15 +12,19 @@ license-files = ["LICENSE"]
 requires-python = ">=3.11"
 keywords = ["text-extraction", "pdf", "docx", "xlsx", "pptx", "arabic", "rag", "chunking"]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Natural Language :: Arabic",
     "Natural Language :: English",
     "Topic :: Text Processing",
 ]
-# Before a PyPI upload, publish pdf-ar there and replace the URL with "pdf-ar>=0.9":
-# PyPI rejects direct URL dependencies.
 dependencies = [
-    "pdf-ar @ https://github.com/oreaba/pdf-ar/archive/5f104c8ec42e7837a75522c709304fdaac815143.zip",
+    "pdf-ar>=0.1",
     "openpyxl>=3.1",
     "python-pptx>=1.0",
 ]
@@ -38,6 +42,8 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/oreaba/textkeel"
+Repository = "https://github.com/oreaba/textkeel"
+Issues = "https://github.com/oreaba/textkeel/issues"
 
 [project.scripts]
 textkeel = "textkeel.__main__:main"

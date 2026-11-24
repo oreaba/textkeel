@@ -26,7 +26,7 @@ Any other suffix goes to `review` with reason `unsupported_format`.
 
 ## Legacy Word (`.doc`)
 
-`.doc` is Word's old binary format. Only Word or LibreOffice converts it faithfully, and LibreOffice would add about 400 MB to the image, so textkeel uses a local Word when there is one ([`doc_word.py`](src/textkeel/readers/doc_word.py), [`word_com.py`](src/textkeel/readers/word_com.py)):
+`.doc` is Word's old binary format. Only Word or LibreOffice converts it faithfully, and LibreOffice would add about 400 MB to the image, so textkeel uses a local Word when there is one ([`doc_word.py`](https://github.com/oreaba/textkeel/blob/main/src/textkeel/readers/doc_word.py), [`word_com.py`](https://github.com/oreaba/textkeel/blob/main/src/textkeel/readers/word_com.py)):
 
 - Word runs as a hidden instance, with macros disabled and no dialogs, and opens a private copy read-only. Word never opens the original file.
 - The converted `.docx` is read by `docx_native` and checked against its own XML, like any `.docx`. The output keeps the `.doc` as its source, with `format: doc`, `reader: word+native` and `meta.converted` (Word's version and the converted file's SHA-256).
@@ -39,7 +39,7 @@ The file goes to review with:
 
 In our tests, a conversion took about 6 seconds and a cached rerun under a second.
 
-## The structured output ([`model.py`](src/textkeel/model.py))
+## The structured output ([`model.py`](https://github.com/oreaba/textkeel/blob/main/src/textkeel/model.py))
 
 A `Document` is an ordered list of `Item`s, in reading order:
 
@@ -57,7 +57,7 @@ It exports to:
 
 The document also carries `status` (`ok` or `review`), `reasons` and `meta`: per-page results for PDFs, and the Office check.
 
-## The Office check ([`check.py`](src/textkeel/check.py))
+## The Office check ([`check.py`](https://github.com/oreaba/textkeel/blob/main/src/textkeel/check.py))
 
 For `.docx`, `.xlsx` and `.pptx`, the extracted words are compared with the text the file itself stores. That is every paragraph's runs, or every cell value and sheet name, skipping `mc:Fallback` duplicates and identical header or footer variants. The check measures:
 
@@ -70,7 +70,7 @@ The readers read the same XML the check compares against, so the check catches r
 
 ## PDF headings and lists
 
-`pdf-ar` gives blocks of text. textkeel adds headings and list items from text size, weight and markers ([`pdf_bridge.py`](src/textkeel/readers/pdf_bridge.py) `_classify`):
+`pdf-ar` gives blocks of text. textkeel adds headings and list items from text size, weight and markers ([`pdf_bridge.py`](https://github.com/oreaba/textkeel/blob/main/src/textkeel/readers/pdf_bridge.py) `_classify`):
 
 - a short line at least 15% larger than the body text, or all bold, is a heading;
 - a numbered section ("2.1") takes its depth from its number;
@@ -85,11 +85,11 @@ The words stay exactly `pdf-ar`'s. The heading rules are heuristic: check them o
 Python 3.11 or later:
 
 ```
-pip install "textkeel @ git+https://github.com/oreaba/textkeel.git"         # with pdf-ar, openpyxl, python-pptx
-pip install "textkeel[ocr] @ git+https://github.com/oreaba/textkeel.git"    # adds pytesseract
+pip install textkeel            # with pdf-ar, openpyxl, python-pptx
+pip install "textkeel[ocr]"     # adds pytesseract
 ```
 
-Or from a clone: `pip install -e ".[ocr,dev]"`.
+Or from a clone of the [repository](https://github.com/oreaba/textkeel): `pip install -e ".[ocr,dev]"`.
 
 OCR also needs Tesseract 5 with the `ara` and `eng` models; see [pdf-ar's install notes](https://github.com/oreaba/pdf-ar#install).
 
@@ -127,7 +127,7 @@ print(document.markdown())
 
 ## Docker
 
-The [`Dockerfile`](Dockerfile) builds a CPU-only image with the same Python, PyMuPDF, fontTools and Tesseract models as pdf-ar's image, plus openpyxl and python-pptx. It installs no PyTorch and no models. The image is about 730 MB in `docker images`.
+The [`Dockerfile`](https://github.com/oreaba/textkeel/blob/main/Dockerfile) builds a CPU-only image with the same Python, PyMuPDF, fontTools and Tesseract models as pdf-ar's image, plus openpyxl and python-pptx. It installs no PyTorch and no models. The image is about 730 MB in `docker images`.
 
 Build it from the repository root:
 
@@ -135,7 +135,7 @@ Build it from the repository root:
 docker build -t textkeel:0.1 .
 ```
 
-[`.dockerignore`](.dockerignore) keeps fonts, outputs and `.venv` out of the build. The finished image needs no network.
+[`.dockerignore`](https://github.com/oreaba/textkeel/blob/main/.dockerignore) keeps fonts, outputs and `.venv` out of the build. The finished image needs no network.
 
 The container works in `/data`. Mount a folder that holds the input and a filled `fonts/` folder:
 
@@ -162,4 +162,4 @@ pytest
 
 ## License
 
-[AGPL-3.0](LICENSE). textkeel requires pdf-ar and PyMuPDF, which are AGPL-3.0 (PyMuPDF also sells a commercial license).
+[AGPL-3.0](https://github.com/oreaba/textkeel/blob/main/LICENSE). textkeel requires pdf-ar and PyMuPDF, which are AGPL-3.0 (PyMuPDF also sells a commercial license).
