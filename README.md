@@ -93,7 +93,7 @@ Or from a clone of the [repository](https://github.com/oreaba/textkeel): `pip in
 
 OCR also needs Tesseract 5 with the `ara` and `eng` models; see [pdf-ar's install notes](https://github.com/oreaba/pdf-ar#install).
 
-PDFs read with the `fonts` or `auto` engine (the default is `fonts`) need their fonts in the fonts folder, which holds only the files you put there. Before reading any file, textkeel checks every PDF's fonts. If a needed font is missing or a different version, it prints the table, writes `fonts_report.csv` to the output folder, and stops with exit code 2 without extracting anything. `pdf-ar fonts <folder>` prints the same table on its own; see [Fonts](https://github.com/oreaba/pdf-ar#fonts).
+PDFs read with the `fonts` engine (the default) need their fonts in the fonts folder, which holds only the files you put there. Before reading any file, textkeel checks every PDF's fonts. If a needed font is missing or a different version, it prints the table, writes `fonts_report.csv` to the output folder, and stops with exit code 2 without extracting anything. The `auto` engine never stops for fonts: it prints the same table, reads this machine's installed versions of the missing fonts, and sends pages whose glyphs those do not match to OCR. `pdf-ar fonts <folder>` prints the same table on its own; see [Fonts](https://github.com/oreaba/pdf-ar#fonts).
 
 ## Use
 
@@ -132,7 +132,7 @@ The [`Dockerfile`](https://github.com/oreaba/textkeel/blob/main/Dockerfile) buil
 Build it from the repository root:
 
 ```
-docker build -t textkeel:0.1 .
+docker build -t textkeel .
 ```
 
 [`.dockerignore`](https://github.com/oreaba/textkeel/blob/main/.dockerignore) keeps fonts, outputs and `.venv` out of the build. The finished image needs no network.
@@ -141,9 +141,9 @@ The container works in `/data`. Mount a folder that holds the input and a filled
 
 ```
 # PowerShell
-docker run --rm -v "${PWD}:/data" textkeel:0.1 input --out output
+docker run --rm -v "${PWD}:/data" textkeel input --out output
 # Linux or macOS
-docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/data" textkeel:0.1 input --out output
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/data" textkeel input --out output
 ```
 
 ## Tests

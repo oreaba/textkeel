@@ -148,7 +148,8 @@ def pdf_options(engine: str = "fonts", fonts_dir: Path = Path("fonts"), font_che
 def read_pdf(path: Path, engine: str = "fonts", fonts_dir: Path = Path("fonts"),
              font_check: bool = False, ocr=None, library=None) -> Document:
     """``library``: a fonts folder already checked for this PDF; otherwise the PDF's fonts
-    are checked first and ``MissingFontsError`` stops before anything is read."""
+    are checked first and ``MissingFontsError`` stops before anything is read, except for
+    ``auto``, which reads this machine's installed versions of missing fonts."""
     from pdf_ar.extract import _page, check_fonts
     from pdf_ar.formats import _tables
     from pdf_ar.glyphs import FontMapper
@@ -156,7 +157,7 @@ def read_pdf(path: Path, engine: str = "fonts", fonts_dir: Path = Path("fonts"),
 
     options = pdf_options(engine, fonts_dir, font_check, ocr)
     if options.uses_fonts and library is None:
-        library, _rows = check_fonts([path], options)
+        library, _rows = check_fonts([path], options, strict=engine != "auto")
     elif not options.uses_fonts:
         library = None
     document = Document(str(path), "pdf", f"pdf-ar:{engine}")

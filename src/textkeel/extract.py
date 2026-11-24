@@ -56,15 +56,16 @@ def extract(path: Path, engine: str = "fonts", fonts_dir: Path = Path("fonts"),
 
 def check_pdf_fonts(files: list[Path], engine: str, fonts_dir: Path, font_check: bool,
                     root: Path | None = None, report_dir: Path | None = None):
-    """Every PDF's fonts checked before any file is read: the fonts folder, or None when the
-    engine needs no fonts. Raises ``MissingFontsError`` when a needed font is not there."""
+    """Every PDF's fonts checked before any file is read: (fonts library, rows), or
+    (None, []) when the engine needs no fonts. Raises ``MissingFontsError`` when a needed
+    font is not there, except for ``auto``, which reads this machine's installed versions."""
     from pdf_ar.extract import check_fonts
 
     options = pdf_bridge.pdf_options(engine, fonts_dir, font_check)
     pdfs = [p for p in files if p.suffix.lower() == ".pdf"]
     if not pdfs or not options.uses_fonts:
-        return None
-    return check_fonts(pdfs, options, root, report_dir)[0]
+        return None, []
+    return check_fonts(pdfs, options, root, report_dir, strict=engine != "auto")
 
 
 def write(document: Document, folder: Path) -> None:

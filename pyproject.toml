@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Text Processing",
 ]
 dependencies = [
-    "pdf-ar>=0.1",
+    "pdf-ar>=0.2",
     "openpyxl>=3.1",
     "python-pptx>=1.0",
 ]

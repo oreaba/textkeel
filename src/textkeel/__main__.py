@@ -39,14 +39,21 @@ def main(argv: list[str] | None = None) -> int:
         and not p.resolve().is_relative_to(out))
     root = args.path if args.path.is_dir() else args.path.parent
     try:
-        fonts = check_pdf_fonts(files, args.engine, args.fonts_dir, args.font_check, root,
-                                args.out)
+        fonts, font_rows = check_pdf_fonts(files, args.engine, args.fonts_dir, args.font_check,
+                                           root, args.out)
     except MissingFontsError as error:
         print(table(error.all_rows), flush=True)
         print(f"\n{len(error.rows)} needed font(s) are missing or a different version. Add "
               f"them to {error.fonts_dir} and run again; nothing was extracted. Full table: "
               f"{args.out / 'fonts_report.csv'}", file=sys.stderr)
         return EXIT_MISSING_FONTS
+    blocking = [r for r in font_rows if r.blocking]
+    if blocking:
+        print(table(font_rows), flush=True)
+        print(f"\n{len(blocking)} needed font(s) are not in {args.fonts_dir}. auto reads this "
+              "machine's installed versions where it has them; pages with glyphs those do "
+              f"not match go to OCR, or to review. Full table: "
+              f"{args.out / 'fonts_report.csv'}\n", file=sys.stderr)
     rows = []
     for index, path in enumerate(files, 1):
         print(f"[{index}/{len(files)}] {path.name}", file=sys.stderr)

@@ -2,7 +2,7 @@
 # textkeel: one extractor for PDF, Office, HTML, Markdown, CSV, text and images, CPU only.
 #
 # Build from the repository root:
-#   docker build -t textkeel:0.1 .
+#   docker build -t textkeel .
 # Usage: see README.md ("Docker").
 
 FROM python:3.13-slim-bookworm
