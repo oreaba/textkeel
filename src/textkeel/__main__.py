@@ -65,8 +65,9 @@ def main(argv: list[str] | None = None) -> int:
             document = Document(str(path), path.suffix.lower().lstrip("."), "none",
                                 status="review", reasons=[f"error:{type(error).__name__}"])
             document.meta["error"] = str(error)
+        # The full file name, so report.pdf and report.docx in one folder do not collide.
         write(document, args.out / path.parent.relative_to(args.path if args.path.is_dir()
-                                                            else path.parent))
+                                                            else path.parent), name=path.name)
         rows.append({"source": str(path), "format": document.format, "reader": document.reader,
                      "status": document.status, "reasons": ";".join(document.reasons),
                      "items": len(document.items), "seconds": document.meta.get("seconds")})

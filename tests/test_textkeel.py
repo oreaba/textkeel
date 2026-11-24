@@ -129,9 +129,23 @@ def test_missing_pdf_fonts_stop_the_run_before_any_file_is_read(tmp_path):
     out = tmp_path / "out"
     assert main([str(folder), "--out", str(out), "--fonts-dir", str(tmp_path / "fonts")]
                 ) == EXIT_MISSING_FONTS
-    assert (out / "fonts_report.csv").is_file() and not (out / "a.md").exists()
+    assert (out / "fonts_report.csv").is_file() and not (out / "a.md.md").exists()
     assert main([str(folder), "--out", str(out), "--engine", "native"]) == 0
-    assert (out / "a.md").is_file() and (out / "b.md").is_file()
+    assert (out / "a.md.md").is_file() and (out / "b.pdf.md").is_file()
+
+
+def test_files_that_differ_only_in_extension_keep_their_own_outputs(tmp_path):
+    from textkeel.__main__ import main
+
+    folder = tmp_path / "in"
+    folder.mkdir()
+    (folder / "report.md").write_text("# From Markdown\n", encoding="utf-8")
+    (folder / "report.txt").write_text("From text\n", encoding="utf-8")
+    out = tmp_path / "out"
+    assert main([str(folder), "--out", str(out)]) == 0
+    assert "From Markdown" in (out / "report.md.txt").read_text(encoding="utf-8")
+    assert "From text" in (out / "report.txt.txt").read_text(encoding="utf-8")
+    assert {p.name for p in out.glob("report.*.json")} == {"report.md.json", "report.txt.json"}
 
 
 def test_webp_images_are_wrapped_for_ocr(tmp_path, monkeypatch):

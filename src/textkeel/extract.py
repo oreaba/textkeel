@@ -68,9 +68,11 @@ def check_pdf_fonts(files: list[Path], engine: str, fonts_dir: Path, font_check:
     return check_fonts(pdfs, options, root, report_dir, strict=engine != "auto")
 
 
-def write(document: Document, folder: Path) -> None:
+def write(document: Document, folder: Path, name: str | None = None) -> None:
+    """``<name>.json``, ``.md``, ``.txt`` and ``.chunks.jsonl`` in ``folder``; ``name``
+    defaults to the source's stem."""
     folder.mkdir(parents=True, exist_ok=True)
-    stem = Path(document.source).stem
+    stem = name or Path(document.source).stem
     (folder / f"{stem}.json").write_text(json.dumps(document.to_dict(), ensure_ascii=False,
                                                     indent=1), encoding="utf-8")
     (folder / f"{stem}.md").write_text(document.markdown(), encoding="utf-8")

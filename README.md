@@ -105,12 +105,12 @@ textkeel <file or folder> [--out artifacts/textkeel] [--engine auto|native|fonts
 
 `python -m textkeel` works the same way. A folder is searched recursively for every supported suffix, skipping the output folder. `--engine` and `--font-check` apply to PDFs and mean the same as in `pdf-ar`. `--no-word` and `--doc-cache` apply to `.doc`.
 
-Per file, it writes:
+Per file, named after the full file name so that `report.pdf` and `report.docx` in one folder keep separate outputs, it writes:
 
-- `<stem>.json`: the whole document;
-- `<stem>.md`: Markdown;
-- `<stem>.txt`: body text;
-- `<stem>.chunks.jsonl`: retrieval chunks.
+- `<file name>.json`: the whole document, for example `report.pdf.json`;
+- `<file name>.md`: Markdown;
+- `<file name>.txt`: body text;
+- `<file name>.chunks.jsonl`: retrieval chunks.
 
 For the run, it writes `summary.csv`, with each file's format, status, reasons, item count and seconds.
 
@@ -124,6 +124,8 @@ document = extract(Path("report.docx"))
 print(document.status, document.reasons)
 print(document.markdown())
 ```
+
+`write(document, folder)` writes the same four files, named after the source's stem unless you pass `name=`.
 
 ## Docker
 
