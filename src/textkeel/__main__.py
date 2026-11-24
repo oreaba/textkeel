@@ -12,6 +12,7 @@ from pdf_ar.extract import MissingFontsError
 from pdf_ar.required_fonts import table
 
 from textkeel.extract import SUPPORTED, check_pdf_fonts, extract, write
+from textkeel.model import Document
 
 EXIT_MISSING_FONTS = 2
 
@@ -57,8 +58,13 @@ def main(argv: list[str] | None = None) -> int:
     rows = []
     for index, path in enumerate(files, 1):
         print(f"[{index}/{len(files)}] {path.name}", file=sys.stderr)
-        document = extract(path, args.engine, args.fonts_dir, args.font_check,
-                           doc_cache=doc_cache, use_word=not args.no_word, fonts=fonts)
+        try:
+            document = extract(path, args.engine, args.fonts_dir, args.font_check,
+                               doc_cache=doc_cache, use_word=not args.no_word, fonts=fonts)
+        except Exception as error:  # noqa: BLE001 - one unreadable file must not stop a run
+            document = Document(str(path), path.suffix.lower().lstrip("."), "none",
+                                status="review", reasons=[f"error:{type(error).__name__}"])
+            document.meta["error"] = str(error)
         write(document, args.out / path.parent.relative_to(args.path if args.path.is_dir()
                                                             else path.parent))
         rows.append({"source": str(path), "format": document.format, "reader": document.reader,

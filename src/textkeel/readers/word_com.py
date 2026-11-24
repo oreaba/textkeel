@@ -82,9 +82,9 @@ def convert_with_word(source: Path, target: Path, work_dir: Path, timeout: int) 
     cleanup.write_text(_CLEANUP, encoding="utf-8-sig")
     started = datetime.now(UTC).isoformat()
     try:
-        completed = _powershell(
-            script, "-InputPath", str(source), "-OutputPath", str(target), timeout=timeout
-        )
+        # Word resolves relative paths against its own folder, not this process's.
+        completed = _powershell(script, "-InputPath", str(source.resolve()),
+                                "-OutputPath", str(target.resolve()), timeout=timeout)
     except subprocess.TimeoutExpired as exc:
         _powershell(cleanup, "-Since", started, timeout=60)
         raise ConversionError("word_timeout") from exc

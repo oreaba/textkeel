@@ -134,6 +134,70 @@ def test_missing_pdf_fonts_stop_the_run_before_any_file_is_read(tmp_path):
     assert (out / "a.md").is_file() and (out / "b.md").is_file()
 
 
+def test_webp_images_are_wrapped_for_ocr(tmp_path, monkeypatch):
+    image_module = pytest.importorskip("PIL.Image")
+    import pymupdf
+
+    from textkeel.readers import pdf_bridge
+
+    path = tmp_path / "scan.webp"
+    image_module.new("RGB", (120, 60), "white").save(path)
+    pages = []
+
+    def fake_read_pdf(wrapped, **_kwargs):
+        with pymupdf.open(wrapped) as pdf:
+            pages.append(pdf.page_count)
+        return Document(str(wrapped), "pdf", "pdf-ar:ocr")
+
+    monkeypatch.setattr(pdf_bridge, "read_pdf", fake_read_pdf)
+    document = extract(path)
+    assert pages == [1] and (document.source, document.format) == (str(path), "webp")
+
+
+def test_one_failing_file_does_not_stop_the_run(tmp_path, monkeypatch):
+    import csv
+
+    from textkeel import __main__ as cli
+
+    folder = tmp_path / "in"
+    folder.mkdir()
+    (folder / "a.md").write_text("# Title\n", encoding="utf-8")
+    (folder / "b.txt").write_text("text\n", encoding="utf-8")
+    real = cli.extract
+
+    def flaky(path, *args, **kwargs):
+        if path.suffix == ".md":
+            raise ValueError("broken")
+        return real(path, *args, **kwargs)
+
+    monkeypatch.setattr(cli, "extract", flaky)
+    assert cli.main([str(folder), "--out", str(tmp_path / "out"), "--engine", "native"]) == 0
+    with (tmp_path / "out" / "summary.csv").open(encoding="utf-8") as handle:
+        rows = {Path(r["source"]).name: r for r in csv.DictReader(handle)}
+    assert (rows["a.md"]["status"], rows["a.md"]["reasons"]) == ("review", "error:ValueError")
+    assert rows["b.txt"]["status"] == "ok"
+
+
+def test_word_gets_absolute_paths(tmp_path, monkeypatch):
+    import subprocess
+
+    from textkeel.readers import word_com
+
+    seen = []
+
+    def fake_powershell(_script, *args, timeout):
+        seen.extend(args)
+        Path(args[3]).write_bytes(b"docx")
+        return subprocess.CompletedProcess(args, 0, stdout="word_version=16.0\n")
+
+    monkeypatch.setattr(word_com, "_powershell", fake_powershell)
+    monkeypatch.chdir(tmp_path)
+    Path("cache").mkdir()
+    assert word_com.convert_with_word(Path("cache/a.doc"), Path("cache/a.docx"),
+                                      Path("cache"), timeout=5) == "16.0"
+    assert all(Path(p).is_absolute() for p in (seen[1], seen[3]))
+
+
 def test_doc_converted_by_word_is_read_checked_and_cached(tmp_path, monkeypatch):
     from textkeel.readers import doc_word
     from textkeel.readers.word_com import ConversionError

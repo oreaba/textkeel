@@ -5,8 +5,8 @@ unchanged; drawn table cells are grouped into tables with row and column spans (
 same grouping pdf-ar's Markdown uses), drawn boxes become paragraphs from part
 ``shape``. Page status and reasons are kept per page in ``meta["pages"]``.
 
-Images (.png, .jpg, .tif, ...) are wrapped as a one-page PDF by PyMuPDF and read by
-pdf-ar's OCR engine.
+Images (.png, .jpg, .tif, ...) are wrapped as a one-page PDF by PyMuPDF (WebP through
+Pillow first) and read by pdf-ar's OCR engine.
 """
 
 from __future__ import annotations
@@ -202,7 +202,16 @@ def read_image(path: Path, ocr=None) -> Document:
 
     with tempfile.TemporaryDirectory() as tmp:
         wrapped = Path(tmp) / "image.pdf"
-        image = pymupdf.open(path)
+        try:
+            image = pymupdf.open(path)
+        except pymupdf.FileDataError:
+            # PyMuPDF cannot open WebP; Pillow comes with pytesseract, which OCR needs anyway.
+            from PIL import Image
+
+            png = Path(tmp) / "image.png"
+            with Image.open(path) as source:
+                source.save(png, dpi=source.info.get("dpi", (300, 300)))
+            image = pymupdf.open(png)
         wrapped.write_bytes(image.convert_to_pdf())
         image.close()
         document = read_pdf(wrapped, engine="ocr", ocr=ocr or OcrOptions())
